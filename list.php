@@ -56,6 +56,10 @@
 
     <script src="./js/jquery-3.2.1.min.js"></script>
     <script type="text/javascript">
+      // check total list item
+      const total = document.querySelectorAll('.todo-item').length;
+      alert(total);
+
       $(document).ready(function(){
         $('.remove-to-do').click(function(){
           const id = $(this).attr('id');
