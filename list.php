@@ -33,6 +33,7 @@
                 <span id="<?= $item['id'] ?>" class="remove-to-do">delete</span>
                 <span id="<?= $item['id'] ?>" class="edit-to-do">edit</span>
                 <input type="checkbox"
+                  data-todo-id="<?= $item['id'] ?>"
                   class="check-box"
                   <?php  if($item['checked']) echo "checked";?>>
                 <h2 <?php  if($item['checked']) echo 'class="checked"';?>>
@@ -63,6 +64,25 @@
               id:id
             }, (data) => {
               $(this).parent().hide(600);
+            }
+          );
+        });
+
+        $('.check-box').click(function(e){
+          const id = $(this).attr('data-todo-id');
+
+          $.post("doChecked.php",
+            {
+              id:id
+            }, (data) => {
+              if(data != "error"){
+                const h2 = $(this).next();
+                if(data === '1'){
+                  h2.removeClass('checked');
+                }else{
+                  h2.addClass('checked');
+                }
+              }
             }
           );
         });
