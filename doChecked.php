@@ -23,7 +23,7 @@
           echo "error";
         }
 
-      }      
+      }
 
       $conn->close();
       exit();

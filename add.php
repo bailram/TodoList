@@ -1,16 +1,18 @@
 <?php
-  if (isset($_POST['title'])) {
+  if (isset($_POST['title']) && isset($_POST['idtask'])) {
     include 'connection.php';
 
     $title = $_POST['title'];
-    if (empty($title)) {
-      header("Location: list.php?mess=error");
+    $id_task = $_POST['idtask'];
+    echo "id task : ".$id_task;
+    if (empty($title) || empty($id_task)) {
+      header("Location: main.php?mess=error");
     }else{
-      $sql = "INSERT INTO list(title) VALUE ('$title')";
+      $sql = "INSERT INTO list(id_task,title) VALUE ('$id_task','$title')";
       if ($conn->query($sql) === TRUE) {
-        header("Location: list.php?mess=success");
+        header("Location: main.php");
       } else {
-        header("Location: list.php");
+        header("Location: main.php");
       }
 
       $conn->close();
