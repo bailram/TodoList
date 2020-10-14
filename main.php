@@ -45,8 +45,20 @@
               }
               ?>
               >
-              <a href="#">
-                <?= $menu['title'] ?> <span class="badge">4</span>
+              <a>
+                <?php
+                  echo $menu['title'];
+                  $sqlNotif = "SELECT count(l.id) list from task t join list l on t.id=l.id_task WHERE l.checked=0 and t.id=".$menu['id']." group by t.id;";
+                  $res = $conn->query($sqlNotif);
+                  if($res){
+                    $result = $res->fetch_row();
+                    if(!empty($result[0])){
+                ?>
+                      <span class="badge"><?= $result[0] ?></span>
+                <?php
+                    }
+                  }
+                ?>
                 <span id="<?= $menu['id'] ?>" class="remove-task">X</span>
                 <span id="<?= $menu['id'] ?>" class="edit-task">E</span>
               </a>
@@ -93,7 +105,7 @@
               </div>
               <div class="form-group">
                 <div class="input-group" id="datetimepicker">
-                  <input type="text" class="form-control">
+                  <input type="text" class="form-control" name="deadline" placeholder="Deadline">
                   <span class="input-group-addon">
                     <span class="glyphicon glyphicon-calendar"></span>
                   </span>
@@ -105,8 +117,8 @@
           </div>
           <!-- add-list-end -->
           <!-- list-view-start -->
-          <?php $list_item = $conn->query("SELECT * FROM list ORDER BY id DESC"); ?>
-          <div class="show-todo-section">
+          <?php $list_item = $conn->query("SELECT * FROM list WHERE id_task=".$_SESSION['id_task']." ORDER BY id DESC"); ?>
+          <div class="show-todo-section" id="todo-list-section">
             <?php
               if($list_item->num_rows > 0) {
                 foreach ($list_item as $item) {
@@ -118,10 +130,11 @@
                       data-todo-id="<?= $item['id'] ?>"
                       class="check-box"
                       <?php  if($item['checked']) echo "checked";?>>
-                    <h2 <?php  if($item['checked']) echo 'class="checked"';?>>
-                      <?= $item['title'] ?>
-                    </h2>
-                    <small>created: <?= $item['date_time'] ?></small>
+                    <h2 <?php  if($item['checked']) echo 'class="checked"';?>><?= $item['title'] ?></h2>
+                    <small>
+                      Deadline: <?= $item['date_time_end'] ?>
+                    </small>
+                    <input type="hidden" id="result-deadline" value="<?= $item['date_time_end'] ?>">
                   </div>
             <?php
                 }
@@ -145,119 +158,58 @@
       <!-- user-nav-end -->
     </div>
 
-    <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Open Modal</button>
+    <!-- Modal Edit Task -->
+    <div class="modal fade" id="editListModal" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <form action="updateList.php" method="post">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Edit List</h4>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label>List name :</label>
+                <input type="text"
+                  name="edit-title"
+                  placeholder="Nama list baru"
+                  class ="form-control"
+                  id="edit-list-title"
+                  <?php if(isset($_GET['messT']) && $_GET['messT'] == "error") echo 'style="border-color: #f2dede"'; ?>
+                  />
+                <?php if(isset($_GET['messT']) && $_GET['messT'] == "error") { ?>
+                  <span id="errorMes">Input tidak boleh kosong</span>
+                <?php } ?>
+              </div>
+              <div class="form-group">
+                <label>Deadline : </label>
+                <div class="input-group" id="datetimepicker1">
+                  <input type="text" name="edit-deadline" class="form-control" placeholder="Deadline" id="edit-list-deadline">
+                  <span class="input-group-addon">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                  </span>
+                </div>
+                <input type="hidden" name="list-id" value="" id="edit-list-id">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary" name="button">Save</button>
+            </div>
+          </form>
+        </div>
 
-  <!-- Modal -->
-  <div class="modal fade" id="myModal" role="dialog">
-    <div class="modal-dialog">
-
-      <!-- Modal content-->
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
-          <h4 class="modal-title">Modal Header</h4>
-        </div>
-        <div class="modal-body">
-          <p>Some text in the modal.</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        </div>
       </div>
-
     </div>
-  </div>
+    <!-- Modal Edit Task End -->
   </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
-<script type="text/javascript">
-  $('#datetimepicker').datetimepicker();
-  $(document).ready(function(){
-    $('ul.nav li').click(function(){ // handle menu clicked ui
-      var id = $(this).attr('id');
-
-      // set id task to cookie and change value session
-      // document.cookie="id_task="+id;
-      $.post("changeIdTaskSession.php",
-        {
-          id:id
-        }
-      );
-
-
-      // set id to add list button
-      $('#id-task-list').val(id);
-
-      var elements = document.getElementsByTagName('li');
-      for(var i=0; i<elements.length; i++){
-        if(elements[i].id==id){
-          elements[i].className = 'active';
-        }else{
-          elements[i].className = '';
-        }
-      }
-    });
-    // listener task menu select to change ui end
-
-    $('.remove-to-do').click(function(){
-      const id = $(this).attr('id');
-      $.post("remove.php",
-        {
-          id:id
-        }, (data) => {
-          $(this).parent().hide(600);
-          // check total list item
-          const total = document.querySelectorAll('.todo-item').length - 1;
-          console.log(total);
-          // if total == 0 do add illustration for there is no list information
-        }
-      );
-    });
-    // remove list listener end
-
-    $('.check-box').click(function(e){
-      const id = $(this).attr('data-todo-id');
-
-      $.post("doChecked.php",
-        {
-          id:id
-        }, (data) => {
-          if(data != "error"){
-            const h2 = $(this).next();
-            if(data === '1'){
-              h2.removeClass('checked');
-            }else{
-              h2.addClass('checked');
-            }
-          }
-        }
-      );
-    });
-    // update list listener end
-
-    $('.remove-task').click(function(){
-      const id = $(this).attr('id');
-      // alert(id);
-      $.post("removeTask.php",
-        {
-          id: id
-        }, (data) => {
-          if(data){
-            $(this).parent().hide(600);
-          }else{
-            alert('Deleting task failed!');
-          }
-
-        }
-      );
-
-    });
-    // remove task listener end
-  });
-</script>
+<script src="./js/main.js"></script>
 </body>
 
 </html>
