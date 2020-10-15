@@ -1,0 +1,30 @@
+body {
+  background: #e3dfc8;
+}
+
+.image-view {
+  background: #f5f1da;
+}
+
+#form-view {
+background-color: white;
+}
+
+#image-content img {
+  height: 300px;
+  width: 300px;
+}
+
+#image-content h3 {
+  font-family: Helvetica;
+  font-weight: bold;
+  color: #00416d;
+}
+
+#image-content p {
+  font-family: sans-serif;
+  padding-left: 30px;
+  padding-right: 30px;
+  padding-bottom: 30px;
+  color: #07689f;
+}
