@@ -44,7 +44,7 @@
               <input type="text" class="form-control" name="inputName" id="inputName" value="" required>
             </div>
             <button type="submit" class="btn btn-submit mt-3 mb-3 btn-text" name="button">Sign Up</button><br>
-            <a href="index.php" id="already-have-account">Already have account?</a>
+            <center><a href="index.php" id="already-have-account">Already have account?</a></center>
           </form>
         </div>
         <div class="col-lg-6 image-view">
