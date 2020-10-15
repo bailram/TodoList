@@ -4,8 +4,22 @@ $('#datetimepicker').datetimepicker({
 $('#datetimepicker1').datetimepicker({
   format: 'Y-M-D HH:mm:ss'
 });
+function checkPasswordMatch() {
+  var password = $('#inputPassword').val();
+  var repassword = $('#inputRetypePassword').val();
+  if(password != repassword){
+    $('.invalid-password').show();
+    $('.valid-password').hide();
+  }else{
+    $('.invalid-password').hide();
+    $('.valid-password').show();
+  }
+
+}
 $(document).ready(function(){
-  $('ul.nav li').click(function(){ // handle menu clicked ui
+  $('#inputPassword, #inputRetypePassword').keyup(checkPasswordMatch);
+
+  $('ul.nav-menu li').click(function(){ // handle menu clicked ui
     var id = $(this).attr('id');
 
     // change value id taks session
@@ -77,7 +91,7 @@ $(document).ready(function(){
         id: id
       }, (data) => {
         if(data){
-          // $(this).parent().hide(600);
+          $(this).parent().hide(600);
           location.href="main.php";
         }else{
           alert('Deleting task failed!');
@@ -101,7 +115,7 @@ $(document).ready(function(){
           id:id,
           title: title
         }, (data) => {
-          if(data){            
+          if(data){
             // alert('Task update completed!');
           }else{
             alert('Deleting task failed!');
@@ -128,5 +142,16 @@ $(document).ready(function(){
     $('#edit-list-id').val(id);
 
     $('#editListModal').modal('show');
+  });
+
+  $('.menu-profile').click(function(){
+    $('#editProfileModal').modal('show');
+  });
+
+  $('.menu-change-password').click(function(){
+    // alert("clicked");
+    $('.invalid-password').hide();
+    $('.valid-password').hide();
+    $('#changePasswordModal').modal('show');
   });
 });

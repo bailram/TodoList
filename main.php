@@ -8,28 +8,35 @@
   <!-- Minified Bootstrap CSS -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Pacifico">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./css/style-main.css">
   <?php
     include 'connection.php';
     session_start();
+
+    if(empty($_SESSION['id_user'])){
+      header("Location: index.php");
+    }
   ?>
 </head>
 <body>
   <div class="container">
-    <div class="row" style="margin-top: 30px">
+    <div class="row" style="margin-top: 8px; margin-left: 5px; margin-bottom: 8px;">
+      <h3 style="font-family: Pacifico;">Todolist</h3>
+    </div>
+    <div class="row">
       <!-- task-menu-start -->
       <?php
-        $task_item = $conn->query("SELECT * FROM task ORDER BY id DESC");
-        if(isset($_SESSION['id_task'])){
-          echo "session id task : ".$_SESSION['id_task'];
-        }else{
-          echo "session id task : kosong";
+        $task_item = $conn->query("SELECT * FROM task WHERE id_user=".$_SESSION['id_user']." ORDER BY id DESC");
+        if(!isset($_SESSION['id_task']) || empty($_SESSION['id_task'])){
           $task_item_row = $task_item->fetch_row();
           $_SESSION['id_task'] = $task_item_row[0];
         }
       ?>
       <div class="col-md-3">
-        <ul class="nav nav-pills nav-stacked">
+        <ul class="nav nav-pills nav-stacked nav-menu">
           <?php
           if($task_item->num_rows > 0) {
             $active = 1;
@@ -75,7 +82,7 @@
               placeholder="Nama task baru"
               class ="form-control"
               <?php if(isset($_GET['messT']) && $_GET['messT'] == "error") echo 'style="border-color: #f2dede"'; ?>
-              />
+              required/>
             <?php if(isset($_GET['messT']) && $_GET['messT'] == "error") { ?>
               <span id="errorMes">Input tidak boleh kosong</span>
             <?php } ?>
@@ -98,14 +105,14 @@
                   placeholder="Judul"
                   class ="form-control"
                   <?php if(isset($_GET['mess']) && $_GET['mess'] == "error") echo 'style="border-color: #f2dede"'; ?>
-                  />
+                  required/>
                 <?php if(isset($_GET['mess']) && $_GET['mess'] == "error") { ?>
                   <span id="errorMes">Input tidak boleh kosong</span>
                 <?php } ?>
               </div>
               <div class="form-group">
                 <div class="input-group" id="datetimepicker">
-                  <input type="text" class="form-control" name="deadline" placeholder="Deadline">
+                  <input type="text" class="form-control" name="deadline" placeholder="Deadline" required>
                   <span class="input-group-addon">
                     <span class="glyphicon glyphicon-calendar"></span>
                   </span>
@@ -142,7 +149,11 @@
             ?>
               <div class="todo-item">
                 <div class="empty">
-                  <h2>Data Kosong</h2>
+                  <div class="text-center" id="image-content">
+                    <img src="./img/boy_swimming_monochromatic.svg" class="rounded" alt="">
+                    <h3 class="mt-5">All task are completed</h3>
+                    <p>Let's do some quick rest.</p>
+                  </div>
                 </div>
               </div>
             <?php } ?>
@@ -153,7 +164,19 @@
       <!-- list-end -->
       <!-- user-nav-start -->
       <div class="col">
-        bisa dibuat foto user, update profile, dan logout
+
+        <ul class="nav nav-pills">
+          <li role="presentation" class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+              <?=$_SESSION['nama']?> <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+              <li class="menu-profile menu-cursor-pointer"><a>Profile</a></li>
+              <li class="menu-change-password menu-cursor-pointer"><a>Change Password</a></li>
+              <li><a href="do_logout.php">Logout</a></li>
+            </ul>
+          </li>
+        </ul>
       </div>
       <!-- user-nav-end -->
     </div>
@@ -199,10 +222,98 @@
             </div>
           </form>
         </div>
-
+        <!-- Modal content -->
       </div>
     </div>
     <!-- Modal Edit Task End -->
+
+    <!-- Modal Edit Profile Start -->
+    <div class="modal fade" id="editProfileModal" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <form action="update_profile.php" method="post">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Edit Profile</h4>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label>Username :</label>
+                <input type="text"
+                  name="edit-username"
+                  placeholder="Nama list baru"
+                  class ="form-control"
+                  id="edit-username"
+                  value="<?=$_SESSION['username']?>"
+                  required/>
+              </div>
+              <div class="form-group">
+                <label>Nama :</label>
+                <input type="text"
+                  name="edit-nama"
+                  placeholder="Nama list baru"
+                  class ="form-control"
+                  id="edit-nama"
+                  value="<?=$_SESSION['nama']?>"
+                  required/>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary" name="button">Save</button>
+            </div>
+          </form>
+        </div>
+        <!-- Modal content -->
+      </div>
+    </div>
+    <!-- Modal Edit Profile End -->
+
+    <!-- Modal Change Password Start -->
+    <div class="modal fade" id="changePasswordModal" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <form action="change_password.php" method="post">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Change Password</h4>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label>Old Password :</label>
+                <input type="text"
+                  name="inputOldPassword"
+                  placeholder="Password Lama"
+                  class ="form-control"
+                  id="edit-username"
+                  value=""
+                  required/>
+              </div>
+              <div class="row">
+                <div class="form-group col-md-6">
+                  <label for="inputPassword">Password</label>
+                  <input type="password" class="form-control" name="inputPassword" placeholder="Password Baru" id="inputPassword" value="" required>
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="inputRetypePassword">Retype Password</label>
+                  <input type="password" class="form-control" name="inputRetypePassword" placeholder="Konfirmasi Password" id="inputRetypePassword" value="" onchange="checkPasswordMatch()" required>
+                  <span class="label label-danger invalid-password">Password does not match</span>
+                  <span class="label label-success valid-password">Password match</span>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary" name="button">Save</button>
+            </div>
+          </form>
+        </div>
+        <!-- Modal content -->
+      </div>
+    </div>
+    <!-- Modal Change Password End -->
   </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>

@@ -15,7 +15,7 @@ body {
 background-color: white;
 }
 
-#form-view div small{
+#form-view div h5{
   font-family: 'Open Sans', sans-serif;
 }
 
@@ -45,6 +45,12 @@ background-color: white;
   font-family: 'Open Sans', sans-serif;
   font-size: 15px;
   color: #07689f;
+}
+
+#already-have-account {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 15px;
+  color: #07689f;  
 }
 
 .btn-submit {
